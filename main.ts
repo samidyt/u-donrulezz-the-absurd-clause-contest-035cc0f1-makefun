@@ -1,6 +1,6 @@
 // The Absurd Clause Contest — entry program.
 // Writes one original absurd terms-of-service clause to /output/entry.txt.
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ENTRY =
@@ -17,4 +17,11 @@ if (ENTRY.trim().length === 0 || ENTRY.includes("\n")) {
 
 const outDir = process.env.OUTPUT_DIR ?? "/output";
 mkdirSync(outDir, { recursive: true });
-writeFileSync(join(outDir, "entry.txt"), ENTRY, "utf8");
+const outPath = join(outDir, "entry.txt");
+writeFileSync(outPath, ENTRY, "utf8");
+
+// Read back and refuse to exit cleanly unless what landed on disk is
+// byte-identical to the reviewed line.
+if (readFileSync(outPath, "utf8") !== ENTRY) {
+  throw new Error("entry.txt on disk differs from the reviewed entry");
+}
